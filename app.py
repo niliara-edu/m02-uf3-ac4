@@ -15,8 +15,8 @@ from flask import Flask,render_template,request;
 def connectBD():
     db = mysql.connector.connect(
         host = "localhost",
-        user = "root",
-        passwd = "claumestra",
+        user = "user01",
+        passwd = "admin",
         database = "users"
     )
     return db
@@ -56,10 +56,10 @@ def checkUser(user,password):
     bd=connectBD()
     cursor=bd.cursor()
 
-    query=f"SELECT user,name,surname1,surname2,age,genre FROM users WHERE user='{user}'\
-            AND password='{password}'"
-    print(query)
-    cursor.execute(query)
+    query="""SELECT user,name,surname1,surname2,age,genre
+    FROM users WHERE user=%s AND password=%s"""
+    values = (user, password)
+    cursor.execute(query, values)
     userData = cursor.fetchall()
     bd.close()
     
@@ -89,7 +89,37 @@ def login():
 
 @app.route("/signin")
 def signin():
-    return "SIGN IN PAGE"
+    return render_template("signin.html")
+
+@app.route("/newUser",methods=('GET', 'POST'))
+def newUser():
+    if request.method == ('POST'):
+        formData = request.form
+        user=formData['usuario']
+        password=formData['contraseña']
+        name=formData['nombre']
+        surname1=formData['apellido1']
+        surname2=formData['apellido2']
+        age=formData['edad']
+        genre=formData['genero']
+        createUser(user,password,name,surname1,surname2,age,genre)    
+        return render_template("home.html")
+
+def createUser(user,password,name,surname1,surname2,age,genre):
+    bd=connectBD()
+    cursor=bd.cursor()
+    query = f"INSERT INTO users \
+            VALUES(%s,%s,%s,%s,%s,%s,%s);"
+    age=int(age)
+    values=(user,password,name,surname1,surname2,age,genre)
+    print(type(user))
+    print(type(age))
+    cursor.execute(query,values)
+    bd.commit()
+    bd.close()
+    return
+
+
 
 @app.route("/results",methods=('GET', 'POST'))
 def results():
