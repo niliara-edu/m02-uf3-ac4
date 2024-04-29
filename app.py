@@ -35,7 +35,7 @@ def initBD():
             surname1 varchar(30), \
             surname2 varchar(30), \
             age integer, \
-            genre enum('H','D','NS/NC')); "
+            gender enum('H','D','NS/NC')); "
     cursor.execute(query)
             
     # Operación de inicialización de la tabla users (si está vacía)
@@ -44,19 +44,19 @@ def initBD():
     count = cursor.fetchall()[0][0]
     if(count == 0):
         query = "INSERT INTO users \
-            VALUES('user01','admin','Ramón','Sigüenza','López',35,'H');"
+            VALUES('user01','admin','Nil','Pernil','Cocodril',69,'H');"
         cursor.execute(query)
 
     bd.commit()
     bd.close()
     return
 
-# checkUser: comprueba si el par usuario-contraseña existe en la BD
+# checkUser: comprueba si el par user-contraseña existe en la BD
 def checkUser(user,password):
     bd=connectBD()
     cursor=bd.cursor()
 
-    query="""SELECT user,name,surname1,surname2,age,genre
+    query="""SELECT user,name,surname1,surname2,age,gender
     FROM users WHERE user=%s AND password=%s"""
     values = (user, password)
     cursor.execute(query, values)
@@ -68,11 +68,7 @@ def checkUser(user,password):
     else:
         return userData[0]
 
-# cresteUser: crea un nuevo usuario en la BD
-def createUser(user,password,name,surname1,surname2,age,genre):
-    
-    return
-
+# cresteUser: crea un nuevo user en la BD
 # Secuencia principal: configuración de la aplicación web ##########################################
 # Instanciación de la aplicación web Flask
 app = Flask(__name__)
@@ -95,23 +91,23 @@ def signin():
 def newUser():
     if request.method == ('POST'):
         formData = request.form
-        user=formData['usuario']
-        password=formData['contraseña']
-        name=formData['nombre']
-        surname1=formData['apellido1']
-        surname2=formData['apellido2']
-        age=formData['edad']
-        genre=formData['genero']
-        createUser(user,password,name,surname1,surname2,age,genre)    
+        user=formData['user']
+        password=formData['password']
+        name=formData['name']
+        surname1=formData['surname1']
+        surname2=formData['surname2']
+        age=formData['age']
+        gender=formData['gender']
+        createUser(user,password,name,surname1,surname2,age,gender)    
         return render_template("home.html")
 
-def createUser(user,password,name,surname1,surname2,age,genre):
+def createUser(user,password,name,surname1,surname2,age,gender):
     bd=connectBD()
     cursor=bd.cursor()
     query = f"INSERT INTO users \
             VALUES(%s,%s,%s,%s,%s,%s,%s);"
     age=int(age)
-    values=(user,password,name,surname1,surname2,age,genre)
+    values=(user,password,name,surname1,surname2,age,gender)
     print(type(user))
     print(type(age))
     cursor.execute(query,values)
@@ -125,8 +121,8 @@ def createUser(user,password,name,surname1,surname2,age,genre):
 def results():
     if request.method == ('POST'):
         formData = request.form
-        user=formData['usuario']
-        password=formData['contrasena']
+        user=formData['user']
+        password=formData['password']
         userData = checkUser(user,password)
 
         if userData == False:
